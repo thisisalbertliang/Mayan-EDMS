@@ -1,0 +1,33 @@
+services:
+  mayan-edms-postgres:
+    restart: always
+    ports:
+      - 5432:5432
+    environment: 
+      - POSTGRES_USER=mayan
+      - POSTGRES_DB=mayan
+      - POSTGRES_PASSWORD=mayanuserpass
+    volumes:
+      - ${PWD}/docker-volumes/mayan-edms/postgres:/var/lib/postgresql/data
+    image: postgres:10.15-alpine
+  mayan-edms-redis:
+    restart: always
+    ports:
+      - 6379:6379
+    volumes:
+      - ${PWD}/docker-volumes/mayan-edms/redis:/data
+    image: redis:6.0-alpine
+    command: redis-server --databases "3" --maxmemory-policy allkeys-lru --save "" --requirepass mayanredispassword
+  mayan-edms:
+    restart: always
+    ports: 
+      - 80:8000
+    environment:
+      - MAYAN_CELERY_BROKER_URL=redis://:mayanredispassword@172.17.0.1:6379/0
+      - MAYAN_CELERY_RESULT_BACKEND=redis://:mayanredispassword@172.17.0.1:6379/1
+      - MAYAN_DATABASES={'default':{'ENGINE':'django.db.backends.postgresql','NAME':'mayan','PASSWORD':'mayanuserpass','USER':'mayan','HOST':'172.17.0.1'}}
+      - MAYAN_LOCK_MANAGER_BACKEND=mayan.apps.lock_manager.backends.redis_lock.RedisLock
+      - MAYAN_LOCK_MANAGER_BACKEND_ARGUMENTS={'redis_url':'redis://:mayanredispassword@172.17.0.1:6379/2'}
+    volumes:
+      - ${PWD}/docker-volumes/mayan-edms/media:/var/lib/mayan
+    image: mayanedms/mayanedms:4.0.7
