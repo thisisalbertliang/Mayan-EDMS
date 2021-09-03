@@ -47,7 +47,7 @@ link_message_single_delete = Link(
 )
 link_message_list = Link(
     badge_text=get_unread_message_count, icon=icon_message_list,
-    text='', view='messaging:message_list'
+    text='Message List', view='messaging:message_list'
 )
 link_message_single_mark_read = Link(
     args='object.pk', conditional_disable=condition_is_read,
