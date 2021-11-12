@@ -16,3 +16,5 @@ jobs:
       run: make docker-build
     - name: Run tests
       run: make docker-runtest-all
+    - name: Close Stale Issues
+      uses: actions/stale@v4.0.0
